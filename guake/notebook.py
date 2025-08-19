@@ -29,7 +29,6 @@ from guake.globals import PROMPT_ALWAYS
 from guake.globals import PROMPT_PROCESSES
 from guake.menus import mk_notebook_context_menu
 from guake.prefs import PrefsDialog
-from guake.utils import HidePrevention
 from guake.utils import gdk_is_x11_display
 from guake.utils import get_process_name
 from guake.utils import save_tabs_when_changed
