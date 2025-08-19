@@ -35,6 +35,11 @@ class TerminalContextMenuCallbacks:
     def on_toggle_fullscreen(self, *args):
         FullscreenManager(self.settings, self.window).toggle()
 
+    def on_toggle_pin_open(self, *args):
+        # Toggle the global hide-on-lose-focus setting
+        current = self.settings.general.get_boolean("window-losefocus")
+        self.settings.general.set_boolean("window-losefocus", not current)
+
     def on_save_to_file(self, *args):
         SaveTerminalDialog(self.terminal, self.window).run()
 

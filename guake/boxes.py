@@ -642,9 +642,14 @@ class TabLabelEventBox(Gtk.EventBox):
         self.notebook = notebook
         self.box = Gtk.Box(homogeneous=Gtk.Orientation.HORIZONTAL, spacing=0, visible=True)
         self.label = Gtk.Label(label=text, visible=True)
-        # Use application pin icon.. initially hidden
+        # Tab-level pin indicator: scaled symbolic pin icon, initially hidden
         self.pin_icon = Gtk.Image.new_from_icon_name("view-pin-symbolic", Gtk.IconSize.MENU)
         self.pin_icon.set_visible(False)
+        # Scale down a bit to better fit inside tab label
+        try:
+            self.pin_icon.set_pixel_size(12)
+        except Exception:
+            pass
         self.close_button = Gtk.Button(
             image=Gtk.Image.new_from_icon_name("window-close", Gtk.IconSize.MENU),
             relief=Gtk.ReliefStyle.NONE,

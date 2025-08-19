@@ -90,6 +90,10 @@ def mk_terminal_context_menu(terminal, window, settings, callback_object):
     mi = Gtk.MenuItem(_("Toggle Fullscreen"))
     mi.connect("activate", callback_object.on_toggle_fullscreen)
     menu.add(mi)
+    # New: Pin open (toggle pin-mode) just under Toggle Fullscreen
+    mi = Gtk.MenuItem(_("Toggle auto-hide"))
+    mi.connect("activate", callback_object.on_toggle_pin_open)
+    menu.add(mi)
     menu.add(Gtk.SeparatorMenuItem())
     mi = Gtk.MenuItem(_("Split ―"))
     mi.connect("activate", callback_object.on_split_horizontal)
