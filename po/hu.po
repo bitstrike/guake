@@ -2345,6 +2345,16 @@ msgstr ""
 "Kérlek használj általános billentyűket mint a Control, Alt vagy Shift "
 "egyszerre.\n"
 
+#: guake/menus.py:94
+msgid "Toggle auto-hide"
+msgstr ""
+
+#: guake/main.py:349
+msgid ""
+"Rename tab specified by --tab-index. Reset to default if TITLE is a single "
+"dash \"-\"."
+msgstr ""
+
 #~ msgid "Save to File..."
 #~ msgstr "Mentés fájlba..."
 
