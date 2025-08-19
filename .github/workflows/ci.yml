@@ -38,17 +38,20 @@ jobs:
           sudo apt update -q
           # Install additional GTK/GObject development packages needed for building
           sudo apt-get install --no-install-recommends -y \
-            libgirepository1.0-dev \
-            libglib2.0-dev \
-            libgtk-3-dev \
-            libvte-2.91-dev \
-            libwnck-3-dev \
-            libkeybinder-3.0-dev \
-            libnotify-dev \
-            libcairo2-dev \
-            pkg-config \
-            meson \
-            ninja-build
+          libgirepository1.0-dev \
+          gobject-introspection \
+          libglib2.0-dev \
+          libglib2.0-bin \
+          libgtk-3-dev \
+          libvte-2.91-dev \
+          libwnck-3-dev \
+          libkeybinder-3.0-dev \
+          libnotify-dev \
+          libcairo2-dev \
+          pkg-config \
+          meson \
+          ninja-build \
+          gir1.2-gtk-3.0
           yes | sudo ./scripts/bootstrap-dev-debian.sh
           ./scripts/bootstrap-dev-pip.sh system
 
@@ -79,21 +82,21 @@ jobs:
         with:
           name: dist
           path: dist
-
-  release-test:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
-    needs:
-      - build
-    steps:
-      - name: Retrieve dists
-        uses: actions/download-artifact@v4
-        with:
-          path: ./
-      - name: Publish distribution 📦 to Test PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          verify-metadata: false
-          verbose: true
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository-url: https://test.pypi.org/legacy/
+# no token for test pypi
+#  release-test:
+#    runs-on: ubuntu-latest
+#    if: github.ref == 'refs/heads/master'
+#    needs:
+#      - build
+#    steps:
+#      - name: Retrieve dists
+#        uses: actions/download-artifact@v4
+#        with:
+#          path: ./
+#      - name: Publish distribution 📦 to Test PyPI
+#        uses: pypa/gh-action-pypi-publish@release/v1
+#        with:
+#          verify-metadata: false
+#          verbose: true
+#          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+#          repository-url: https://test.pypi.org/legacy/
