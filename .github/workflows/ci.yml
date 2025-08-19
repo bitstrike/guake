@@ -38,7 +38,7 @@ jobs:
           sudo apt update -q
           # Install additional GTK/GObject development packages needed for building
           sudo apt-get install --no-install-recommends -y \
-          libgirepository1.0-dev \
+          libgirepository-2.0-dev \
           gobject-introspection \
           libglib2.0-dev \
           libglib2.0-bin \
