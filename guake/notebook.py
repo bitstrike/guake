@@ -90,13 +90,19 @@ class TerminalNotebook(Gtk.Notebook):
         self.notebook_on_button_press_id = self.connect(
             "button-press-event", self.on_button_press, None
         )
+        # Update pin indicator when tab is switched
+        self.connect("switch-page", self.on_switch_page)
+        # initial refresh once widget is drawn/ready
+        self.connect("realize", self.on_realize)
 
         # Action box
         self.pin_button = Gtk.ToggleButton(
             image=Gtk.Image.new_from_icon_name("view-pin-symbolic", Gtk.IconSize.MENU),
             visible=False,
         )
-        self.pin_button.connect("clicked", self.on_pin_clicked)
+        # Prevent feedback loops when syncing UI from settings
+        self._syncing_pin_ui = False
+        self.pin_button.connect("toggled", self.on_pin_toggled)
         self.new_page_button = Gtk.Button(
             image=Gtk.Image.new_from_icon_name("tab-new-symbolic", Gtk.IconSize.MENU),
             visible=True,
@@ -121,7 +127,15 @@ class TerminalNotebook(Gtk.Notebook):
         self.guake = guake
 
         self.guake.settings.general.onChangedValue("window-losefocus", self.on_lose_focus_toggled)
-        self.pin_button.set_visible(self.guake.settings.general.get_boolean("window-losefocus"))
+        # Button should start visible and reflect current pin-mode state
+        self.pin_button.set_visible(True)
+        pin_mode = not self.guake.settings.general.get_boolean("window-losefocus")
+        self.pin_button.set_active(pin_mode)
+        # Initial refresh
+        self._refresh_active_tab_pin_icon(self.get_current_page())
+
+    def on_realize(self, *args):
+        self._refresh_active_tab_pin_icon(self.get_current_page())
 
     def on_button_press(self, target, event, user_data):
         if event.button == 3:
@@ -143,15 +157,53 @@ class TerminalNotebook(Gtk.Notebook):
 
         return False
 
-    def on_pin_clicked(self, user_data=None):
-        hide_prevention = HidePrevention(self.guake.window)
-        if self.pin_button.get_active():
-            hide_prevention.prevent()
-        else:
-            hide_prevention.allow()
+    def on_switch_page(self, notebook, page, page_num):
+        self._refresh_active_tab_pin_icon(page_num)
+
+    def _refresh_active_tab_pin_icon(self, target_index=None):
+        try:
+            pin_mode = not self.guake.settings.general.get_boolean("window-losefocus")
+            current = target_index if isinstance(target_index, int) else self.get_current_page()
+            if current is None or current < 0:
+                return
+            # Hide on all tabs first
+            for i in range(self.get_n_pages()):
+                page = self.get_nth_page(i)
+                label = self.get_tab_label(page)
+                if hasattr(label, "set_pin_icon_visible"):
+                    label.set_pin_icon_visible(False)
+            # Show on current tab if in pin-mode
+            if pin_mode and current < self.get_n_pages():
+                page = self.get_nth_page(current)
+                label = self.get_tab_label(page)
+                if hasattr(label, "set_pin_icon_visible"):
+                    label.set_pin_icon_visible(True)
+        except Exception:
+            # just switch tabs if we can't update the pin icon
+            pass
+
+    def on_pin_toggled(self, button):
+        # If we are syncing from settings, ignore user callback
+        if getattr(self, "_syncing_pin_ui", False):
+            return
+        # User toggled the button: write to settings
+        pin_mode = button.get_active()
+        # window-losefocus is the inverse of pin-mode
+        self.guake.settings.general.set_boolean("window-losefocus", not pin_mode)
+        # on_lose_focus_toggled will refresh UI
 
     def on_lose_focus_toggled(self, settings, key, user_data=None):
-        self.pin_button.set_visible(settings.get_boolean(key))
+        # Button should always be visible, just show pressed state
+        self.pin_button.set_visible(True)
+        # Set the button's active state to match the pin mode without triggering writeback
+        pin_mode = not settings.get_boolean(key)  # window-losefocus=False means pin mode ON
+        self._syncing_pin_ui = True
+        try:
+            self.pin_button.set_active(pin_mode)
+        finally:
+            self._syncing_pin_ui = False
+        # Update indicator to follow app-level mode
+        self._refresh_active_tab_pin_icon(self.get_current_page())
 
     @save_tabs_when_changed
     def on_new_tab(self, user_data):
@@ -525,6 +577,10 @@ class TerminalNotebook(Gtk.Notebook):
         widget.destroy()
         if response_id == Gtk.ResponseType.OK:
             self.guake.restore_tabs()
+
+    def on_terminal_spawned(self, *args):
+        # When a terminal is spawned, ensure the indicator matches config
+        self._refresh_active_tab_pin_icon(self.get_current_page())
 
 
 class NotebookManager(GObject.Object):

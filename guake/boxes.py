@@ -642,6 +642,9 @@ class TabLabelEventBox(Gtk.EventBox):
         self.notebook = notebook
         self.box = Gtk.Box(homogeneous=Gtk.Orientation.HORIZONTAL, spacing=0, visible=True)
         self.label = Gtk.Label(label=text, visible=True)
+        # Use application pin icon.. initially hidden
+        self.pin_icon = Gtk.Image.new_from_icon_name("view-pin-symbolic", Gtk.IconSize.MENU)
+        self.pin_icon.set_visible(False)
         self.close_button = Gtk.Button(
             image=Gtk.Image.new_from_icon_name("window-close", Gtk.IconSize.MENU),
             relief=Gtk.ReliefStyle.NONE,
@@ -652,6 +655,7 @@ class TabLabelEventBox(Gtk.EventBox):
         )
         self.box.pack_start(self.label, True, True, 0)
         self.box.pack_end(self.close_button, False, False, 0)
+        self.box.pack_end(self.pin_icon, False, False, 0)
         self.add(self.box)
         self.connect("button-press-event", self.on_button_press, self.label)
 
@@ -660,6 +664,9 @@ class TabLabelEventBox(Gtk.EventBox):
 
     def get_text(self):
         return self.label.get_text()
+
+    def set_pin_icon_visible(self, visible: bool):
+        self.pin_icon.set_visible(bool(visible))
 
     def grab_focus_on_last_focused_terminal(self):
         server_time = get_server_time(self.notebook.guake.window)
