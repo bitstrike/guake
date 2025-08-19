@@ -22,6 +22,24 @@ Introduction
 Guake is a python based dropdown terminal made for the GNOME desktop environment. Guake's style of window is
 based on an FPS game, and one of its goals is to be easy to reach.
 
+Pin Terminal Feature
+===================
+
+This fork enhances Guake with a **Pin Terminal** feature that adds visual indicators to the existing "Pin mode" functionality. When enabled, the current active tab displays a pin icon, making it easy to identify which terminal is preventing Guake from hiding.
+
+**Key Benefits:**
+- **Visual Feedback**: Clear indication on tab that pin-mode is active
+- **Screenshot-Friendly**: Perfect for taking screenshots of terminal content without the terminal hiding
+- **Consistent State**: Synchronized pin state between hotkey, app button, and tab indicators
+- **Easy Control**: Can "Toggle auto-hide" option in the terminal context menu
+
+**How It Works:**
+1. Enable pin mode using the global hotkey (Ctrl+Shift+F1) or app pin button
+2. The active tab shows a pin icon when pin mode is active
+3. Guake stays visible even when focus is lost
+4. Toggle pin mode to restore normal hide-on-lose-focus behavior
+
+
 Quick Installation Guide
 ------------------------
 
