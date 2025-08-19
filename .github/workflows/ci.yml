@@ -64,7 +64,12 @@ jobs:
           pkg-config \
           meson \
           ninja-build \
-          gir1.2-gtk-3.0
+          gir1.2-gtk-3.0 \
+          gir1.2-keybinder-3.0 \
+          libkeybinder-3.0-0 \
+          gir1.2-vte-2.91 \
+          gir1.2-wnck-3.0 \
+          gir1.2-notify-0.7
           yes | sudo ./scripts/bootstrap-dev-debian.sh
           ./scripts/bootstrap-dev-pip.sh system
 
