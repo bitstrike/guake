@@ -497,6 +497,9 @@ update-readme-md:
 	sed -i "s#^- \\*\\*Version\\*\\*:\\s*.*#- **Version**: $$VERSION#g" README.md; \
 	sed -i "s#^- \\*\\*Git Commit\\*\\*:\\s*.*#- **Git Commit**: \`$$GIT_COMMIT\`#g" README.md; \
 	sed -i "s#^- \\*\\*SHA256\\*\\*:\\s*.*#- **SHA256**: \`$$NEW_SHA256\`#g" README.md; \
+	# Update installation examples with new version \
+	sed -i "s#guake_3\.11\.dev[0-9]*-[0-9]*_amd64\.deb#$$DEB_FILE#g" README.md; \
+	sed -i "s#v3\.11\.dev[0-9]*#v$$VERSION#g" README.md; \
 	echo "README.md updated"
 
 github-release: deb
