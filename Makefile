@@ -493,9 +493,43 @@ update-readme-md:
 	fi; \
 	GIT_COMMIT=$$(git rev-parse --short HEAD); \
 	NEW_SHA256=$$(sha256sum "$$DEB_FILE" | cut -d' ' -f1); \
-	sed -i "s#^\\*\\*Package\\*\\*:\\s*.*#**Package**: \`$$DEB_FILE\`#g" README.md; \
-	sed -i "s#^\\*\\*Version\\*\\*:\\s*.*#**Version**: $$VERSION#g" README.md; \
-	sed -i "s#^\\*\\*Git Commit\\*\\*:\\s*.*#**Git Commit**: \`$$GIT_COMMIT\`#g" README.md; \
-	sed -i "s#^\\*\\*SHA256\\*\\*:\\s*.*#**SHA256**: \`$$NEW_SHA256\`#g" README.md; \
+	sed -i "s#^- \\*\\*Package\\*\\*:\\s*.*#- **Package**: \`$$DEB_FILE\`#g" README.md; \
+	sed -i "s#^- \\*\\*Version\\*\\*:\\s*.*#- **Version**: $$VERSION#g" README.md; \
+	sed -i "s#^- \\*\\*Git Commit\\*\\*:\\s*.*#- **Git Commit**: \`$$GIT_COMMIT\`#g" README.md; \
+	sed -i "s#^- \\*\\*SHA256\\*\\*:\\s*.*#- **SHA256**: \`$$NEW_SHA256\`#g" README.md; \
 	echo "README.md updated"
+
+github-release: deb
+	@echo "Creating GitHub release..."
+	@DEB_FILE=$$(ls -t guake_*.deb 2>/dev/null | head -1); \
+	if [ "$$DEB_FILE" = "" ]; then echo "No .deb file found"; exit 1; fi; \
+	VERSION_DEB=$$(dpkg-deb -f "$$DEB_FILE" Version 2>/dev/null || echo ""); \
+	if [ "$$VERSION_DEB" = "" ]; then \
+		BASENAME=$$(basename "$$DEB_FILE"); \
+		VERSION=$$(echo "$$BASENAME" | sed -E 's/^guake_(.+)_amd64\.deb/\1/'); \
+	else \
+		VERSION=$$VERSION_DEB; \
+	fi; \
+	GIT_COMMIT=$$(git rev-parse --short HEAD); \
+	echo "Creating release for version $$VERSION (commit $$GIT_COMMIT)"; \
+	gh release create "v$$VERSION" "$$DEB_FILE" --title "Guake $$VERSION" --notes "Release $$VERSION built from git commit $$GIT_COMMIT" --draft; \
+	echo "GitHub release created! Update README with release link and publish when ready."
+
+update-readme-with-release-link:
+	@echo "Updating README with GitHub release link..."
+	@DEB_FILE=$$(ls -t guake_*.deb 2>/dev/null | head -1); \
+	if [ "$$DEB_FILE" = "" ]; then echo "No .deb file found"; exit 1; fi; \
+	VERSION_DEB=$$(dpkg-deb -f "$$DEB_FILE" Version 2>/dev/null || echo ""); \
+	if [ "$$VERSION_DEB" = "" ]; then \
+		BASENAME=$$(basename "$$DEB_FILE"); \
+		VERSION=$$(echo "$$BASENAME" | sed -E 's/^guake_(.+)_amd64\.deb/\1/'); \
+	else \
+		VERSION=$$VERSION_DEB; \
+	fi; \
+	REPO_URL="https://github.com/bitstrike/guake"; \
+	RELEASE_URL="$$REPO_URL/releases/download/v$$VERSION/$$DEB_FILE"; \
+	echo "Release URL: $$RELEASE_URL"; \
+	sed -i "s#^- \\*\\*Package\\*\\*:\\s*\`[^\`]*\`#- **Package**: \`$$DEB_FILE\`#g" README.md; \
+	sed -i "s#\`$$DEB_FILE\`#[\`$$DEB_FILE\`]($$RELEASE_URL)#g" README.md; \
+	echo "README updated with GitHub release link"
 

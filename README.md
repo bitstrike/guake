@@ -13,6 +13,7 @@ Guake is a python based dropdown terminal made for the GNOME desktop environment
 
 This fork enhances Guake with a visual indicator on the terminal tab when the existing "do-not-hide-on-lost-focus" functionality is enabled. This makes it easy to identify when guake is not in auto-hide mode. This can also now be toggled from the Guake context menu.
 
+
 Additionally, a .deb package builder was added to the Makefile because I always like to have that option.  An sha256sum is included at build time so you can verify the package is authentic if you find it somewhere else on the web.
 
 **Key Benefits:**
@@ -22,10 +23,13 @@ Additionally, a .deb package builder was added to the Makefile because I always 
 - **Easy Control**: Can "Toggle auto-hide" option in the terminal context menu
 
 **How It Works:**
-1. Enable pin mode using the global hotkey (Ctrl+Shift+F1) or app pin button
-2. The active tab shows a pin icon when pin mode is active
-3. Guake stays visible even when focus is lost
-4. Toggle pin mode to restore normal hide-on-lose-focus behavior
+- Enable pin mode using the global hotkey (Ctrl+Shift+F1) or app pin button
+- The active tab shows a pin icon when pin mode is active
+- Guake stays visible even when focus is lost
+- Toggle pin mode to restore normal hide-on-lose-focus behavior
+
+**Pin Mode in Action:**
+![Pin Mode Feature](images/pin-mode-2.png)
 
 ## Installation
 
@@ -33,11 +37,11 @@ Additionally, a .deb package builder was added to the Makefile because I always 
 
 Debian package (`.deb`) is built for easy installation on Debian/Ubuntu systems:
 
-**Package**: `guake_3.11.dev40-1-1_amd64.deb`
-**Version**: 3.11.dev40-1
-**Architecture**: amd64  
-**Git Commit**: `d78755c0`
-**SHA256**: `72fd2bd19527d741de76b083b3a856bc55b547daeaedeb29a4bcd3f0fb7c40ee`
+- **Package**: `guake_3.11.dev40-1-1_amd64.deb`
+- **Version**: 3.11.dev40-1
+- **Architecture**: amd64  
+- **Git Commit**: `272d7c65`
+- **SHA256**: `fa335843f1948157de4d72aa9e9f4323af136d1d27353221a2c45effb12dc9f8`
 
 **Install with:**
 ```bash
