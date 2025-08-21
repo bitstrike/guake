@@ -40,8 +40,8 @@ Debian package (`.deb`) is built for easy installation on Debian/Ubuntu systems:
 - **Package**: `guake_3.11.dev40-1-1_amd64.deb`
 - **Version**: 3.11.dev40-1
 - **Architecture**: amd64  
-- **Git Commit**: `272d7c65`
-- **SHA256**: `fa335843f1948157de4d72aa9e9f4323af136d1d27353221a2c45effb12dc9f8`
+- **Git Commit**: `4bffacd8`
+- **SHA256**: `fbfcfb54d0a345bd383119e719ae60ea0895bdd4fb8f043b51af315dffb3b6dc`
 
 **Install with:**
 ```bash
@@ -50,8 +50,8 @@ sudo apt install <deb_file>
 
 **Or download and install manually:**
 ```bash
-wget https://github.com/bitstrike/guake/releases/download/v3.11.dev39/guake_3.11.dev39-1_amd64.deb
-sudo dpkg -i guake_3.11.dev39-1_amd64.deb
+wget https://github.com/bitstrike/guake/releases/download/v3.11.dev40-1/guake_3.11.dev40-1-1_amd64.deb
+sudo dpkg -i guake_3.11.dev40-1-1_amd64.deb
 ```
 
 **Note**: This package includes all necessary dependencies and will install to the system-wide `/usr` directory.
@@ -59,7 +59,7 @@ sudo dpkg -i guake_3.11.dev39-1_amd64.deb
 **Verify Package Integrity:**
 ```bash
 # Verify SHA256 checksum
-echo "<SHA256_from_above>  guake_3.11.dev39-1_amd64.deb" | sha256sum -c
+echo "<SHA256_from_above>  guake_3.11.dev40-1-1_amd64.deb" | sha256sum -c
 ```
 
 ## Building from Source
