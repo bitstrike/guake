@@ -11,7 +11,9 @@ Guake is a python based dropdown terminal made for the GNOME desktop environment
 
 ## Pin Terminal Feature
 
-This fork enhances Guake with a **Pin Terminal** feature that adds visual indicators to the existing "Pin mode" functionality. When enabled, the current active tab displays a pin icon, making it easy to identify which terminal is preventing Guake from hiding.
+This fork enhances Guake with a visual indicator on the terminal tab when the existing "do-not-hide-on-lost-focus" functionality is enabled. This makes it easy to identify when guake is not in auto-hide mode. This can also now be toggled from the Guake context menu.
+
+Additionally, a .deb package builder was added to the Makefile because I always like to have that option.  An sha256sum is included at build time so you can verify the package is authentic if you find it somewhere else on the web.
 
 **Key Benefits:**
 - **Visual Feedback**: Clear indication on tab that pin-mode is active
@@ -29,16 +31,17 @@ This fork enhances Guake with a **Pin Terminal** feature that adds visual indica
 
 ### Pre-built Debian Package
 
-A pre-built Debian package (`.deb`) is available for easy installation on Debian/Ubuntu systems:
+Debian package (`.deb`) is built for easy installation on Debian/Ubuntu systems:
 
-**Package**: `guake_3.11.dev39-1_amd64.deb`  
-**Version**: 3.11.dev39  
+**Package**: `guake_3.11.dev40-1-1_amd64.deb`
+**Version**: 3.11.dev40-1
 **Architecture**: amd64  
-**SHA256**: `1039c50b06983b917e027ea0ceb8857c2a4ecb9ada35093274ad69b0b38a3349`
+**Git Commit**: `d78755c0`
+**SHA256**: `72fd2bd19527d741de76b083b3a856bc55b547daeaedeb29a4bcd3f0fb7c40ee`
 
 **Install with:**
 ```bash
-sudo apt install ./guake_3.11.dev39-1_amd64.deb
+sudo apt install <deb_file>
 ```
 
 **Or download and install manually:**
@@ -52,7 +55,7 @@ sudo dpkg -i guake_3.11.dev39-1_amd64.deb
 **Verify Package Integrity:**
 ```bash
 # Verify SHA256 checksum
-echo "1039c50b06983b917e027ea0ceb8857c2a4ecb9ada35093274ad69b0b38a3349  guake_3.11.dev39-1_amd64.deb" | sha256sum -c
+echo "<SHA256_from_above>  guake_3.11.dev39-1_amd64.deb" | sha256sum -c
 ```
 
 ## Building from Source
@@ -82,6 +85,7 @@ make deb
 This will:
 - Create a `.deb` package in the parent directory (`../guake_VERSION-1_amd64.deb`)
 - Automatically update the README with the new version and SHA256 checksum
+- Include git commit information for package traceability
 - Clean up any previous package files
 
 **Manual Makefile Targets:**

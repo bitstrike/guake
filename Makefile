@@ -41,7 +41,7 @@ reset:
 	dconf reset -f /org/guake/
 
 
-all: clean dev style checks dists test docs
+all: clean dev style checks dists test docs deb
 
 dev: clean-ln-venv ensure-pip pipenv-install-dev requirements ln-venv setup-githook \
 	 prepare-install install-dev-locale
@@ -203,7 +203,7 @@ dists: update-po requirements prepare-install rm-dists sdist bdist wheels
 build: dists
 
 sdist: generate-paths
-	export SKIP_GIT_SDIST=1 && PIPENV_IGNORE_VIRTUALENVS=1 pipenv run python setup.py sdist
+	export SKIP_GIT_SDIST=1 && python3 setup.py sdist
 
 rm-dists:
 	rm -rf build dist
@@ -213,9 +213,27 @@ bdist: generate-paths
 	@echo "Ignoring build of bdist package"
 
 wheels: generate-paths
-	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run python setup.py bdist_wheel
+	python3 setup.py bdist_wheel
 
 wheel: wheels
+
+clean-old-deb:
+	@echo "Cleaning up old .deb files..."
+	@rm -f ../guake_*.deb ../guake_*.changes ../guake_*.buildinfo
+
+deb: clean generate-paths clean-old-deb
+
+	@echo "Building Debian package..."
+	@if [ ! -d debian ]; then \
+		echo "Creating Debian package structure..."; \
+		VERSION=$$(python3 setup.py --version); \
+		echo "Package version: $$VERSION"; \
+		dh_make --createorig --single --yes -p guake_$$VERSION; \
+	fi
+	@echo "Building package with direct dpkg-deb..."
+	@cd debian && fakeroot dpkg-deb --build guake ../guake_$$(grep "^Version:" guake/DEBIAN/control | cut -d' ' -f2)-1_amd64.deb
+	@echo "Debian package built successfully!"
+	@$(MAKE) update-readme-md
 
 run-local: compile-glib-schemas-dev
 ifdef V
@@ -301,8 +319,8 @@ update:
 lock: pipenv-lock requirements
 
 requirements:
-	PIPENV_IGNORE_VIRTUALENVS=1 pipenv requirements > requirements.txt
-	PIPENV_IGNORE_VIRTUALENVS=1 pipenv requirements --dev > requirements-dev.txt
+	@echo "Using existing requirements.txt and requirements-dev.txt"
+	@if [ ! -f requirements.txt ]; then echo "requirements.txt not found, creating from setup.py"; python3 setup.py egg_info; fi
 
 pipenv-lock:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv lock
@@ -439,3 +457,45 @@ styles: style
 uninstall: uninstall-system
 upgrade: update
 wheel: wheels
+
+update-readme-checksum:
+	@echo "Updating README with new SHA256 checksum..."
+	@DEB_FILE=$$(ls -t ../guake_*.deb 2>/dev/null | head -1); \
+	if [ "$$DEB_FILE" != "" ]; then \
+		NEW_SHA256=$$(sha256sum "$$DEB_FILE" | cut -d' ' -f1); \
+		echo "Deb file: $$DEB_FILE"; \
+		echo "New SHA256: $$NEW_SHA256"; \
+		sed -i "s/SHA256: ``[a-f0-9]*``/SHA256: ``$$NEW_SHA256``/" README.rst; \
+		echo "README updated with new SHA256 checksum"; \
+	else \
+		echo "No .deb file found to calculate checksum"; \
+	fi
+
+update-readme-version:
+	@echo "Updating README with new version and package name..."
+	@VERSION=$$(python3 setup.py --version); \
+	PACKAGE_NAME="guake_$$VERSION-1_amd64.deb"; \
+	echo "New version: $$VERSION, Package: $$PACKAGE_NAME"; \
+	sed -i "s/guake_[0-9.]*-[0-9]*_amd64\.deb/$$PACKAGE_NAME/g" README.rst; \
+	sed -i "s/Version: [0-9.]*/Version: $$VERSION/g" README.rst; \
+	echo "README updated with new version and package name"
+
+update-readme-md:
+	@echo "Updating README.md with Package, Version, Git Commit, and SHA256..."
+	@DEB_FILE=$$(ls -t guake_*.deb 2>/dev/null | head -1); \
+	if [ "$$DEB_FILE" = "" ]; then echo "No .deb file found"; exit 0; fi; \
+	VERSION_DEB=$$(dpkg-deb -f "$$DEB_FILE" Version 2>/dev/null || echo ""); \
+	if [ "$$VERSION_DEB" = "" ]; then \
+		BASENAME=$$(basename "$$DEB_FILE"); \
+		VERSION=$$(echo "$$BASENAME" | sed -E 's/^guake_(.+)_amd64\.deb/\1/'); \
+	else \
+		VERSION=$$VERSION_DEB; \
+	fi; \
+	GIT_COMMIT=$$(git rev-parse --short HEAD); \
+	NEW_SHA256=$$(sha256sum "$$DEB_FILE" | cut -d' ' -f1); \
+	sed -i "s#^\\*\\*Package\\*\\*:\\s*.*#**Package**: \`$$DEB_FILE\`#g" README.md; \
+	sed -i "s#^\\*\\*Version\\*\\*:\\s*.*#**Version**: $$VERSION#g" README.md; \
+	sed -i "s#^\\*\\*Git Commit\\*\\*:\\s*.*#**Git Commit**: \`$$GIT_COMMIT\`#g" README.md; \
+	sed -i "s#^\\*\\*SHA256\\*\\*:\\s*.*#**SHA256**: \`$$NEW_SHA256\`#g" README.md; \
+	echo "README.md updated"
+

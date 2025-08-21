@@ -39,6 +39,88 @@ This fork enhances Guake with a **Pin Terminal** feature that adds visual indica
 3. Guake stays visible even when focus is lost
 4. Toggle pin mode to restore normal hide-on-lose-focus behavior
 
+Installation
+===========
+
+Pre-built Debian Package
+------------------------
+
+A pre-built Debian package (`.deb`) is available for easy installation on Debian/Ubuntu systems:
+
+**Package**: `guake_3.11.dev39-1_amd64.deb`  
+**Version**: 3.11.dev39  
+**Architecture**: amd64  
+**SHA256**: ``1039c50b06983b917e027ea0ceb8857c2a4ecb9ada35093274ad69b0b38a3349``
+
+**Install with:**
+```bash
+sudo apt install ./guake_3.11.dev39-1_amd64.deb
+```
+
+**Or download and install manually:**
+```bash
+wget https://github.com/bitstrike/guake/releases/download/v3.11.dev39/guake_3.11.dev39-1_amd64.deb
+sudo dpkg -i guake_3.11.dev39-1_amd64.deb
+```
+
+**Note**: This package includes all necessary dependencies and will install to the system-wide `/usr` directory.
+
+**Verify Package Integrity:**
+```bash
+# Verify SHA256 checksum
+echo "1039c50b06983b917e027ea0ceb8857c2a4ecb9ada35093274ad69b0b38a3349  guake_3.11.dev39-1_amd64.deb" | sha256sum -c
+```
+
+Building from Source
+====================
+
+Prerequisites
+-------------
+
+Install build dependencies on Debian/Ubuntu systems:
+```bash
+sudo apt install libgirepository1.0-dev python3-dev python3-gi libcairo2-dev pkg-config \
+                 gir1.2-gtk-3.0 gir1.2-keybinder-3.0 libkeybinder-3.0-0 gir1.2-vte-2.91 \
+                 gir1.2-wnck-3.0 gir1.2-notify-0.7 dh-make debhelper meson ninja-build
+```
+
+Build Debian Package
+-------------------
+
+To build your own `.deb` package with the Pin Terminal feature:
+
+```bash
+# Clone the repository
+git clone https://github.com/bitstrike/guake.git
+cd guake
+
+# Build the Debian package (includes automatic README updates)
+make deb
+```
+
+This will:
+- Create a `.deb` package in the parent directory (`../guake_VERSION-1_amd64.deb`)
+- Automatically update the README with the new version and SHA256 checksum
+- Clean up any previous package files
+
+**Manual Makefile Targets:**
+```bash
+make clean-old-deb          # Remove old .deb files
+make update-readme-version  # Update version in README
+make update-readme-checksum # Update SHA256 checksum in README
+```
+
+Install Your Built Package
+---------------------------
+
+```bash
+# Install the package you just built
+sudo apt install ../guake_*.deb
+
+# Or verify checksum first, then install
+sha256sum ../guake_*.deb
+sudo dpkg -i ../guake_*.deb
+```
 
 Quick Installation Guide
 ------------------------
@@ -62,7 +144,10 @@ won't work because one of the main components of Guake build system, PBR, requir
 history to be available when building from source. Note this does not impact source distribution
 packages you can download from Pypi.
 
-Build from sources instructions are described on
+**For this enhanced version**: Use the "Building from Source" section above to build a proper
+`.deb` package with the Pin Terminal feature included.
+
+Original build from sources instructions are described on
 `this page of the Online Documentation <http://guake.readthedocs.io/en/latest/user/installing.html#install-from-source>`_.
 Please read this carefully before opening an issue!
 
