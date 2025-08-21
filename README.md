@@ -35,34 +35,20 @@ Additionally, a .deb package builder was added to the Makefile because I always 
 
 ### Pre-built Debian Package
 
-Debian package (`.deb`) is built for easy installation on Debian/Ubuntu systems:
+Pre-built Debian packages (`.deb`) are available for easy installation on Debian/Ubuntu systems. 
 
-- **Package**: `guake_3.11.dev40-1-1_amd64.deb`
-- **Version**: 3.11.dev40-1
-- **Architecture**: amd64  
-- **Git Commit**: `6df59c50`
-- **SHA256**: `729b4ffd5df54bc9f5a42417b4506880cbd006fc61b76bae3ffe83e009241b84`
-
-**Install with:**
+**Download and install:**
 ```bash
-sudo apt install <deb_file>
-```
+# Download the latest package from GitHub releases
+wget https://github.com/bitstrike/guake/releases/latest/download/guake_*.deb
 
-**Or download and install manually:**
-```bash
-wget https://github.com/bitstrike/guake/releases/download/v3.11.dev40-1-1-1/guake_3.11.dev40-1-1_amd64.deb
-sudo dpkg -i guake_3.11.dev40-1-1_amd64.deb
+# Install the package
+sudo dpkg -i guake_*.deb
 ```
 
 **Note**: This package includes all necessary dependencies and will install to the system-wide `/usr` directory.
 
-**Verify Package Integrity:**
-```bash
-# Verify SHA256 checksum
-echo "<SHA256_from_above>  guake_3.11.dev40-1-1_amd64.deb" | sha256sum -c
-```
-
-**Note**: The latest package and SHA256 checksum are also available on the [GitHub releases page](https://github.com/bitstrike/guake/releases).
+**Package details and SHA256 checksums** are available on the [GitHub releases page](https://github.com/bitstrike/guake/releases).
 
 ## Building from Source
 
@@ -84,32 +70,19 @@ To build your own `.deb` package with the Pin Terminal feature:
 git clone https://github.com/bitstrike/guake.git
 cd guake
 
-# Build the Debian package (includes automatic README updates)
+# Build the Debian package
 make deb
 ```
 
 This will:
-- Create a `.deb` package in the parent directory (`../guake_VERSION-1_amd64.deb`)
-- Automatically update the README with the new version and SHA256 checksum
-- Include git commit information for package traceability
+- Create a `.deb` package in the current directory
 - Clean up any previous package files
-
-**Manual Makefile Targets:**
-```bash
-make clean-old-deb          # Remove old .deb files
-make update-readme-version  # Update version in README
-make update-readme-checksum # Update SHA256 checksum in README
-```
 
 ### Install Your Built Package
 
 ```bash
 # Install the package you just built
-sudo apt install ../guake_*.deb
-
-# Or verify checksum first, then install
-sha256sum ../guake_*.deb
-sudo dpkg -i ../guake_*.deb
+sudo apt install ./guake_*.deb
 ```
 
 ## Quick Installation Guide

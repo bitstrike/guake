@@ -1,5 +1,4 @@
 .PHONY: build dev
-
 PYTHON?=python3
 PYTHON_INTERPRETER?=$(PYTHON)
 MODULE:=guake
@@ -7,69 +6,49 @@ DESTDIR:=/
 PREFIX?=/usr/local
 exec_prefix:=$(PREFIX)
 bindir = $(exec_prefix)/bin
-
 # Use site.getsitepackages([PREFIX]) to guess possible install paths for uninstall.
 PYTHON_SITEDIRS_FOR_PREFIX="env PREFIX=$(PREFIX) $(PYTHON_INTERPRETER) scripts/all-sitedirs-in-prefix.py"
 ROOT_DIR=$(shell pwd)
 DATA_DIR=$(ROOT_DIR)/guake/data
 COMPILE_SCHEMA:=1
-
 datarootdir:=$(PREFIX)/share
 datadir:=$(datarootdir)
 localedir:=$(datarootdir)/locale
 gsettingsschemadir:=$(datarootdir)/glib-2.0/schemas
-
 AUTOSTART_FOLDER:=~/.config/autostart
-
 DEV_DATA_DIR:=$(DATA_DIR)
-
 SHARE_DIR:=$(datadir)/guake
 GUAKE_THEME_DIR:=$(SHARE_DIR)/guake
 LOGIN_DESTOP_PATH = $(SHARE_DIR)
 IMAGE_DIR:=$(SHARE_DIR)/pixmaps
 GLADE_DIR:=$(SHARE_DIR)
 SCHEMA_DIR:=$(gsettingsschemadir)
-
 SLUG:=fragment_name
-
 default: prepare-install
 	# 'make' target, so users can install guake without need to install the 'dev' dependencies
-
 prepare-install: generate-desktop generate-paths generate-mo compile-glib-schemas-dev
-
 reset:
 	dconf reset -f /org/guake/
-
-
 all: clean dev style checks dists test docs deb
-
 dev: clean-ln-venv ensure-pip pipenv-install-dev requirements ln-venv setup-githook \
 	 prepare-install install-dev-locale
 dev-actions: ensure-pip-system pipenv-install-dev prepare-install
-
 ensure-pip:
 	./scripts/bootstrap-dev-pip.sh
-
 ensure-pip-system:
 	./scripts/bootstrap-dev-pip.sh system
-
 dev-no-pipenv: clean
 	virtualenv --python $(PYTHON_INTERPRETER) .venv
 	. .venv/bin/activate && pip install -r requirements.txt -r requirements-dev.txt -e .
-
 pipenv-install-dev:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv install --dev --python $(PYTHON_INTERPRETER)
-
 ln-venv:
 	# use that to configure a symbolic link to the virtualenv in .venv
 	rm -rf .venv
 	ln -s $$(pipenv --venv) .venv
-
 clean-ln-venv:
 	@rm -f .venv
-
 install-system: install-schemas install-locale install-guake
-
 install-guake:
 	# you probably want to execute this target with sudo:
 	# sudo make install
@@ -80,9 +59,7 @@ install-guake:
 	@echo
 	@echo "#############################################################"
 	@if [ "$(DESTDIR)" = "" ]; then $(PYTHON_INTERPRETER) -m pip install -r requirements.txt; fi
-
 	@if [ `python -c "import sys; print(sys.version_info[0])"` -eq 2 ]; then SETUPTOOLS_SCM_PRETEND_VERSION=3.9.0; fi
-
 	@rm -f guake/paths.py.dev
 	@if [ -f guake/paths.py ]; then mv guake/paths.py guake/paths.py.dev; fi
 	@cp -f guake/paths.py.in guake/paths.py
@@ -93,38 +70,30 @@ install-guake:
 	@sed -i -e 's|{{ SCHEMA_DIR }}|"$(SCHEMA_DIR)"|g' guake/paths.py
 	@sed -i -e 's|{{ LOGIN_DESTOP_PATH }}|"$(LOGIN_DESTOP_PATH)"|g' guake/paths.py
 	@sed -i -e 's|{{ AUTOSTART_FOLDER }}|"$(AUTOSTART_FOLDER)"|g' guake/paths.py
-
 	@$(PYTHON_INTERPRETER) -m pip install . --root "$(DESTDIR)" --prefix="/usr" || echo -e "\033[31;1msetup.py install failed, you may need to run \"sudo git config --global --add safe.directory '*'\"\033[0m"
-
 	@rm -f guake/paths.py
 	@if [ -f guake/paths.py.dev ]; then mv guake/paths.py.dev guake/paths.py; fi
-
 	@update-desktop-database || echo "Could not run update-desktop-database, are you root?"
 	@rm -rfv build *.egg-info
-
 install-locale:
 	for f in $$(find po -iname "*.mo"); do \
 		l="$${f%%.*}"; \
 		lb=$$(basename $$l); \
 		install -Dm644 "$$f" "$(DESTDIR)$(localedir)/$$lb/LC_MESSAGES/guake.mo"; \
 	done;
-
 install-dev-locale:
 	for f in $$(find po -iname "*.mo"); do \
 		l="$${f%%.*}"; \
 		lb=$$(basename $$l); \
 		install -Dm644 "$$f" "guake/po/$$lb/LC_MESSAGES/guake.mo"; \
 	done;
-
 uninstall-locale:
 	find $(DESTDIR)$(localedir)/ -name "guake.mo" -exec rm -f "{}" + || :
 	# prune two levels of empty locale/ subdirs
 	find "$(DESTDIR)$(localedir)" -type d -a -empty -exec rmdir "{}" + || :
 	find "$(DESTDIR)$(localedir)" -type d -a -empty -exec rmdir "{}" + || :
-
 uninstall-dev-locale:
 	@rm -rf guake/po
-
 install-schemas:
 	install -dm755                                       "$(DESTDIR)$(datadir)/applications"
 	install -Dm644 "$(DEV_DATA_DIR)/guake.desktop"       "$(DESTDIR)$(datadir)/applications/"
@@ -143,7 +112,6 @@ install-schemas:
 	install -dm755                                         "$(DESTDIR)$(SCHEMA_DIR)"
 	install -Dm644 "$(DEV_DATA_DIR)/org.guake.gschema.xml" "$(DESTDIR)$(SCHEMA_DIR)/"
 	if [ $(COMPILE_SCHEMA) = 1 ]; then glib-compile-schemas $(DESTDIR)$(SCHEMA_DIR); fi
-
 uninstall-system: uninstall-schemas uninstall-locale
 	$(SHELL) -c $(PYTHON_SITEDIRS_FOR_PREFIX) \
 		| while read sitedir; do \
@@ -154,9 +122,7 @@ uninstall-system: uninstall-schemas uninstall-locale
 	rm -f "$(DESTDIR)$(bindir)/guake"
 	rm -f "$(DESTDIR)$(bindir)/guake-prefs"
 	rm -f "$(DESTDIR)$(bindir)/guake-toggle"
-
 purge-system: uninstall-system reset
-
 uninstall-schemas:
 	rm -f "$(DESTDIR)$(datadir)/applications/guake.desktop"
 	rm -f "$(DESTDIR)$(datadir)/applications/guake-prefs.desktop"
@@ -166,63 +132,42 @@ uninstall-schemas:
 	rm -fr "$(DESTDIR)$(SHARE_DIR)"
 	rm -f "$(DESTDIR)$(SCHEMA_DIR)/org.guake.gschema.xml"
 	rm -f "$(DESTDIR)$(SCHEMA_DIR)/gschemas.compiled"
-
 reinstall:
 	sudo make uninstall && make && sudo make install && $(DESTDIR)$(bindir)/guake
-
 reinstall-v:
 	sudo make uninstall && make && sudo make install && $(DESTDIR)$(bindir)/guake -v
-
 compile-glib-schemas-dev: clean-schemas
 	glib-compile-schemas --strict $(DEV_DATA_DIR)
-
 clean-schemas:
 	rm -f $(DEV_DATA_DIR)/gschemas.compiled
-
 style:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run pre-commit run --all-files
-
 black:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run black $(MODULE)
-
-
 checks: black-check flake8 pylint reno-lint
-
 black-check:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run black --check $(MODULE) --extend-exclude $(MODULE)/_version.py
-
 flake8:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run flake8 guake
-
 pylint:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run pylint --rcfile=.pylintrc --output-format=colorized $(MODULE)
-
 sc: style check
-
 dists: update-po requirements prepare-install rm-dists sdist bdist wheels
 build: dists
-
 sdist: generate-paths
 	export SKIP_GIT_SDIST=1 && python3 setup.py sdist
-
 rm-dists:
 	rm -rf build dist
-
 bdist: generate-paths
 	# pipenv run python setup.py bdist
 	@echo "Ignoring build of bdist package"
-
 wheels: generate-paths
 	python3 setup.py bdist_wheel
-
 wheel: wheels
-
 clean-old-deb:
 	@echo "Cleaning up old .deb files..."
 	@rm -f ../guake_*.deb ../guake_*.changes ../guake_*.buildinfo
-
 deb: clean generate-paths clean-old-deb
-
 	@echo "Building Debian package..."
 	@if [ ! -d debian ]; then \
 		echo "Creating Debian package structure..."; \
@@ -233,61 +178,44 @@ deb: clean generate-paths clean-old-deb
 	@echo "Building package with direct dpkg-deb..."
 	@cd debian && fakeroot dpkg-deb --build guake ../guake_$$(grep "^Version:" guake/DEBIAN/control | cut -d' ' -f2)-1_amd64.deb
 	@echo "Debian package built successfully!"
-	@$(MAKE) update-readme-md
-
 run-local: compile-glib-schemas-dev
 ifdef V
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run ./scripts/run-local.sh -v
 else
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run ./scripts/run-local.sh
 endif
-
 run-local-prefs: compile-glib-schemas-dev
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run ./scripts/run-local-prefs.sh
-
 run-fr: compile-glib-schemas-dev
 	LC_ALL=fr_FR.UTF8 PIPENV_IGNORE_VIRTUALENVS=1 pipenv run ./scripts/run-local.sh
-
-
 shell:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv shell
-
-
 test:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run pytest $(MODULE)
-
 test-actions:
 	xvfb-run -a pipenv run pytest $(MODULE)
 test-coverage:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run py.test -v --cov $(MODULE) --cov-report term-missing
-
 test-pip-install-sdist: clean-pip-install-local generate-paths sdist
 	@echo "Testing installation by pip (will install on ~/.local)"
 	pip install --upgrade -vvv --user $(shell ls -1 dist/*.tar.gz | sort | head -n 1)
 	ls -la ~/.local/share/guake
 	~/.local/bin/guake
-
 clean-pip-install-local:
 	@rm -rfv ~/.local/guake
 	@rm -rfv ~/.local/bin/guake
 	@rm -rfv ~/.local/lib/python3.*/site-packages/guake
 	@rm -rfv ~/.local/share/guake
-
 test-pip-install-wheel: clean-pip-install-local generate-paths wheel
 	@echo "Testing installation by pip (will install on ~/.local)"
 	pip install --upgrade -vvv --user $(shell ls -1 dist/*.whl | sort | head -n 1)
 	ls -la ~/.local/share/guake
 	~/.local/bin/guake -v
-
 sct: style check update-po requirements test
-
-
 docs: clean-docs sdist
 	cd docs && PIPENV_IGNORE_VIRTUALENVS=1 pipenv run make html
-
 docs-open:
 	xdg-open docs/_build/html/index.html
-
 tag-pbr:
 	@{ \
 		set -e ;\
@@ -306,58 +234,38 @@ tag-pbr:
 	@# Note:
 	@# To sign, need gpg configured and the following command:
 	@#  git tag -s $$VERSION -m \"$$PROJECTNAME $$VERSION\""
-
 pypi-publish: build
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run python setup.py upload -r pypi
-
-
 update:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv update --clear
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv install --dev
-
-
 lock: pipenv-lock requirements
-
 requirements:
 	@echo "Using existing requirements.txt and requirements-dev.txt"
 	@if [ ! -f requirements.txt ]; then echo "requirements.txt not found, creating from setup.py"; python3 setup.py egg_info; fi
-
 pipenv-lock:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv lock
-
-
 freeze:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run pip freeze
-
-
 setup-githook:
 	rm -f .git/hooks/post-commit
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run pre-commit install
-
-
 push:
 	git push origin --tags
-
-
 clean: clean-ln-venv rm-dists clean-docs clean-po clean-schemas clean-py clean-paths uninstall-dev-locale
 	@echo "clean successful"
-
 clean-py:
 	@pipenv --rm ; true
 	@find . -name "*.pyc" -exec rm -f {} \;
 	@rm -f $(DEV_DATA_DIR)/guake-prefs.desktop $(DEV_DATA_DIR)/guake.desktop
 	@rm -rf .eggs *.egg-info po/*.pot
-
 clean-paths:
 	rm -f guake/paths.py guake/paths.py.dev
-
 clean-po:
 	@rm -f po/guake.pot
 	@find po -name "*.mo" -exec rm -f {} \;
-
 clean-docs:
 	rm -rf doc/_build
-
 update-po:
 	echo "generating pot file"
 	@find guake -iname "*.py" | xargs xgettext --from-code=UTF-8 --output=guake-python.pot
@@ -378,17 +286,13 @@ update-po:
 	    msgcat --use-first "$$f" po/guake.pot > "$$f.new"; \
 	    mv "$$f.new" $$f; \
 	done;
-
 pot: update-po
-
 generate-mo:
 	@for f in $$(find po -iname "*.po"); do \
 	    echo "generating $$f"; \
 		l="$${f%%.*}"; \
 		msgfmt "$$f" -o "$$l.mo"; \
 	done;
-
-
 generate-desktop:
 	@echo "generating desktop files"
 	@msgfmt --desktop --template=$(DEV_DATA_DIR)/guake.template.desktop \
@@ -401,7 +305,6 @@ generate-desktop:
 		   -o $(DEV_DATA_DIR)/guake-prefs.desktop || ( \
 			   	echo "Skipping .desktop files, is your gettext version < 0.19.1?" && \
 				cp $(DEV_DATA_DIR)/guake-prefs.template.desktop $(DEV_DATA_DIR)/guake-prefs.desktop)
-
 generate-paths:
 	@echo "Generating path.py..."
 	@cp -f guake/paths.py.in guake/paths.py
@@ -414,15 +317,11 @@ generate-paths:
 	@sed -i -e 's|{{ GUAKE_THEME_DIR }}|get_default_theme_dir()|g' guake/paths.py
 	@sed -i -e 's|{{ GLADE_DIR }}|get_default_glade_dir()|g' guake/paths.py
 	@sed -i -e 's|{{ SCHEMA_DIR }}|get_default_schema_dir()|g' guake/paths.py
-
 reno:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run reno new $(SLUG) --edit
-
 reno-lint:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run reno -q lint
-
 release-note: release-note-github
-
 release-note-github: reno-lint
 	@echo
 	@echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -441,7 +340,6 @@ release-note-github: reno-lint
 			sed 's/\r\ \ >\ \-\ /\r  - /g' | \
 			sed 's/\\\#/\#/g' | \
 		tr '\r' '\n'
-
 # aliases to gracefully handle typos on poor dev's terminal
 check: checks
 devel: dev
@@ -457,51 +355,6 @@ styles: style
 uninstall: uninstall-system
 upgrade: update
 wheel: wheels
-
-update-readme-checksum:
-	@echo "Updating README with new SHA256 checksum..."
-	@DEB_FILE=$$(ls -t ../guake_*.deb 2>/dev/null | head -1); \
-	if [ "$$DEB_FILE" != "" ]; then \
-		NEW_SHA256=$$(sha256sum "$$DEB_FILE" | cut -d' ' -f1); \
-		echo "Deb file: $$DEB_FILE"; \
-		echo "New SHA256: $$NEW_SHA256"; \
-		sed -i "s/SHA256: ``[a-f0-9]*``/SHA256: ``$$NEW_SHA256``/" README.rst; \
-		echo "README updated with new SHA256 checksum"; \
-	else \
-		echo "No .deb file found to calculate checksum"; \
-	fi
-
-update-readme-version:
-	@echo "Updating README with new version and package name..."
-	@VERSION=$$(python3 setup.py --version); \
-	PACKAGE_NAME="guake_$$VERSION-1_amd64.deb"; \
-	echo "New version: $$VERSION, Package: $$PACKAGE_NAME"; \
-	sed -i "s/guake_[0-9.]*-[0-9]*_amd64\.deb/$$PACKAGE_NAME/g" README.rst; \
-	sed -i "s/Version: [0-9.]*/Version: $$VERSION/g" README.rst; \
-	echo "README updated with new version and package name"
-
-update-readme-md:
-	@echo "Updating README.md with Package, Version, Git Commit, and SHA256..."
-	@DEB_FILE=$$(ls -t guake_*.deb 2>/dev/null | head -1); \
-	if [ "$$DEB_FILE" = "" ]; then echo "No .deb file found"; exit 0; fi; \
-	VERSION_DEB=$$(dpkg-deb -f "$$DEB_FILE" Version 2>/dev/null || echo ""); \
-	if [ "$$VERSION_DEB" = "" ]; then \
-		BASENAME=$$(basename "$$DEB_FILE"); \
-		VERSION=$$(echo "$$BASENAME" | sed -E 's/^guake_(.+)_amd64\.deb/\1/'); \
-	else \
-		VERSION=$$VERSION_DEB; \
-	fi; \
-	GIT_COMMIT=$$(git rev-parse --short HEAD); \
-	NEW_SHA256=$$(sha256sum "$$DEB_FILE" | cut -d' ' -f1); \
-	sed -i "s#^- \\*\\*Package\\*\\*:\\s*.*#- **Package**: \`$$DEB_FILE\`#g" README.md; \
-	sed -i "s#^- \\*\\*Version\\*\\*:\\s*.*#- **Version**: $$VERSION#g" README.md; \
-	sed -i "s#^- \\*\\*Git Commit\\*\\*:\\s*.*#- **Git Commit**: \`$$GIT_COMMIT\`#g" README.md; \
-	sed -i "s#^- \\*\\*SHA256\\*\\*:\\s*.*#- **SHA256**: \`$$NEW_SHA256\`#g" README.md; \
-	# Update installation examples with new version \
-	sed -i "s#guake_3\.11\.dev[0-9]*-[0-9]*_amd64\.deb#$$DEB_FILE#g" README.md; \
-	sed -i "s#v3\.11\.dev[0-9]*#v$$VERSION#g" README.md; \
-	echo "README.md updated"
-
 github-release: deb
 	@echo "Creating GitHub release..."
 	@DEB_FILE=$$(ls -t guake_*.deb 2>/dev/null | head -1); \
@@ -517,22 +370,3 @@ github-release: deb
 	echo "Creating release for version $$VERSION (commit $$GIT_COMMIT)"; \
 	gh release create "v$$VERSION" "$$DEB_FILE" --title "Guake $$VERSION" --notes "Release $$VERSION built from git commit $$GIT_COMMIT" --draft; \
 	echo "GitHub release created! Update README with release link and publish when ready."
-
-update-readme-with-release-link:
-	@echo "Updating README with GitHub release link..."
-	@DEB_FILE=$$(ls -t guake_*.deb 2>/dev/null | head -1); \
-	if [ "$$DEB_FILE" = "" ]; then echo "No .deb file found"; exit 1; fi; \
-	VERSION_DEB=$$(dpkg-deb -f "$$DEB_FILE" Version 2>/dev/null || echo ""); \
-	if [ "$$VERSION_DEB" = "" ]; then \
-		BASENAME=$$(basename "$$DEB_FILE"); \
-		VERSION=$$(echo "$$BASENAME" | sed -E 's/^guake_(.+)_amd64\.deb/\1/'); \
-	else \
-		VERSION=$$VERSION_DEB; \
-	fi; \
-	REPO_URL="https://github.com/bitstrike/guake"; \
-	RELEASE_URL="$$REPO_URL/releases/download/v$$VERSION/$$DEB_FILE"; \
-	echo "Release URL: $$RELEASE_URL"; \
-	sed -i "s#^- \\*\\*Package\\*\\*:\\s*\`[^\`]*\`#- **Package**: \`$$DEB_FILE\`#g" README.md; \
-	sed -i "s#\`$$DEB_FILE\`#[\`$$DEB_FILE\`]($$RELEASE_URL)#g" README.md; \
-	echo "README updated with GitHub release link"
-
