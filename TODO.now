@@ -1,0 +1,32 @@
+TODO.now - Current Issues and Tasks
+
+## Immediate Issues
+
+### GtkCssProvider Import Error
+- **Problem**: `ImportError: cannot import name GtkCssProvider, introspection typelib not found`
+- **Location**: `guake/guake_app.py` line 45
+- **Context**: Added CSS styling for pin emoji feature
+- **Status**: RESOLVED - Removed CSS styling and fixed gettext import
+- **Action Needed**: None
+
+## Pin Terminal Feature Status
+- ✅ Tab context menu item added ("Toggle auto-hide")
+- ✅ Tab pin icon using 📍 emoji
+- ✅ Global pin button using 📍 emoji  
+- ✅ CSS styling for pin emoji (removed - not needed)
+- ✅ State synchronization between tab, button, and hotkey
+- ✅ Startup state reading from config
+- 🔄 **Testing in progress** - Application starts successfully, need to verify pin functionality
+
+## Build System Status
+- ✅ Debian package creation working
+- ✅ README.md updated with pin feature documentation
+- ✅ GitHub release automation working
+- ⚠️ Python tests disabled due to dependency issues
+
+## Next Steps
+1. ✅ Fix GtkCssProvider import issue - COMPLETED
+2. ✅ Test application import and startup - COMPLETED  
+3. 🔄 Test pin terminal feature functionality - IN PROGRESS
+4. ⏳ Commit working changes
+5. ⏳ Test full application build and run
