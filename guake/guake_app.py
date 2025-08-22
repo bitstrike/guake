@@ -42,6 +42,7 @@ from gi.repository import GLib
 from gi.repository import Gdk
 from gi.repository import Gio
 from gi.repository import Gtk
+
 from gi.repository import Keybinder
 
 from guake import gtk_version
@@ -136,6 +137,9 @@ class Guake(SimpleGladeApp):
 
         select_gtk_theme(self.settings)
         patch_gtk_theme(self.get_widget("window-root").get_style_context(), self.settings)
+        
+
+        
         self.add_callbacks(self)
 
         log.info("Guake Terminal %s", guake_version())

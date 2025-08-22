@@ -96,7 +96,7 @@ class TerminalNotebook(Gtk.Notebook):
 
         # Action box
         self.pin_button = Gtk.ToggleButton(
-            image=Gtk.Image.new_from_icon_name("view-pin-symbolic", Gtk.IconSize.MENU),
+            label="📍",
             visible=False,
         )
         # Prevent feedback loops when syncing UI from settings

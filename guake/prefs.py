@@ -17,12 +17,16 @@ License along with this program; if not, write to the
 Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301 USA
 """
+import builtins
 import logging
 import os
 import re
 import shutil
 
+from locale import gettext
 from textwrap import dedent
+
+builtins.__dict__["_"] = gettext
 
 import gi
 
