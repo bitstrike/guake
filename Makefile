@@ -175,6 +175,11 @@ deb: clean generate-paths clean-old-deb
 		echo "Package version: $$VERSION"; \
 		dh_make --createorig --single --yes -p guake_$$VERSION; \
 	fi
+	@echo "Fixing SGID permissions for dpkg-deb..."
+	@if [ -d debian/guake ]; then \
+		chmod g-s debian/guake/ 2>/dev/null || true; \
+		chmod g-s debian/guake/DEBIAN/ 2>/dev/null || true; \
+	fi
 	@echo "Building package with direct dpkg-deb..."
 	@cd debian && fakeroot dpkg-deb --build guake ../guake_$$(grep "^Version:" guake/DEBIAN/control | cut -d' ' -f2)-1_amd64.deb
 	@echo "Debian package built successfully!"
